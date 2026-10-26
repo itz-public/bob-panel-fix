@@ -1,0 +1,4 @@
+# Not for the public repo: internal diagnosis notes and earlier drafts.
+.internal/
+# Commit briefs for bob.
+.bob-briefs/
