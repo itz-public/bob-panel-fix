@@ -4,12 +4,31 @@ Diagnosis and fix for the IBM Bob desktop app on Windows opening with a **blank 
 pane**: the window loads, but the chat pane is empty, Bob's menu items are greyed out and
 its commands are missing from the command palette.
 
-## Status
+## The fix
 
-**Diagnosing. No fix is published yet.** The working theory is that the window is
-*untrusted* (VS Code workspace trust, which Bob is built on), so Bob's built-in extension
-never loads. `Test-BobTrust.ps1` checks that theory by breaking and fixing the pane on
-purpose. A one-line fix will be added here once a test proves which change works.
+In PowerShell, as the user who uses Bob (no administrator rights needed):
+
+```powershell
+irm https://ibm.biz/bob-pane-fix | iex
+```
+
+Then close every Bob window and start Bob again.
+
+`Fix-BobPane.ps1` turns workspace trust off for that user, in Bob's `settings.json`:
+`"security.workspace.trust.enabled": false`. It is safe to run more than once, and saves the
+original as `settings.json.bobpanefix-backup`.
+
+**Trade-off:** Bob no longer opens folders in Restricted Mode, so it gives no warning before
+running code from a folder you open. Open only code you trust.
+
+## Cause
+
+The window is *untrusted* (VS Code workspace trust, which Bob is built on), and Bob's built-in
+extension does not run in an untrusted window, so its chat pane never loads. Nothing is
+logged. Proven on a test machine: choosing **Don't Trust** in *Workspaces: Manage Workspace
+Trust* reproduces the fault exactly, and the setting above cures it with that decision still
+saved. The working directory Bob starts in is not the cause: starting it from
+`C:\Windows\System32` did not break it.
 
 ## Test-BobTrust.ps1
 
